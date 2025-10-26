@@ -15,3 +15,42 @@ Example Code Executed:
     "0 || 0"
     "true && false"
     "define is_valid bool true"
+
+Test scripts:
+
+========= 1 ===========
+
+define x int 0
+
+while (x < 3) {
+    out x
+    assign x x + 1
+}
+
+if (x == 3) {
+    out "done"
+} else {
+    out "error"
+}
+
+========= 2 ===========
+
+define x int 9
+x++
+out x ; should display '10'
+
+define y int 3
+y--
+out y ; should display '2'
+
+========= 3 ===========
+
+
+define x int 4
+x++
+out x ; should display '5'
+
+define y int 3
+y--
+y--
+out y ; should display '1'

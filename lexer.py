@@ -8,17 +8,26 @@ class Lexer:
         self.text = ""
         self.tokens = []
         self.token_specs = [
+            ("OUTPUT", r"OUT|out"),
+            ("IF", r"IF|if"),
+            ("ELSE", r"ELSE|else"),
+            ("WHILE", r"WHILE|while"),
             ("DEFINE", r"define|DEFINE"),
             ("ASSIGN", r"assign|ASSIGN"),
             ("TYPE", r"int|INT|float|FLOAT|string|STRING|char|CHAR|bool|BOOL|void|VOID"),
+            ("CAST", r"\((int|float|string|char|bool|void)\)"),
             ("NUMBER", r"\d+(\.\d*)?"),
             ("STRING", r'"[^"]*"'),
             ("CHAR", r"'.'"),
-            # ("NULLABLEID", r"\??[A-Za-z_][A-Za-z0-9_]*"),            
+            # ("NULLABLEID", r"\??[A-Za-z_][A-Za-z0-9_]*"),
+            ("INC", r"\+\+"),
+            ("DEC", r"--"),           
             ("IDENTIFIER", r"[A-Za-z_][A-Za-z0-9_]*"),
             ("COMMENT", r";"),
             ("LPAREN", r"\("),
             ("RPAREN", r"\)"),
+            ("RCBRACE", r"\}"),
+            ("LCBRACE", r"\{"),
             ("COMMA", r","),
             ("ADD", r"\+"),
             ("SUB", r"-"),
@@ -47,11 +56,16 @@ class Lexer:
         self.text = text
         self.position = 0
         self.tokens = []
+        line_num = 1
+        line_start = 0
 
         for match in re.finditer(self.token_regex, text):
             kind = match.lastgroup
             value = match.group()
+            column = match.start() - line_start + 1
             if kind in ("WHITESPACE", "NEWLINE"):
+                line_num += 1
+                line_start = match.end()
                 continue
             elif kind == "NUMBER":
                 value = float(value) if '.' in value else int(value)
@@ -59,6 +73,8 @@ class Lexer:
                 value = value[1:-1]  # Remove quotes
             elif kind == "CHAR":
                 value = value[1]  # Remove quotes
+            elif kind == "CAST":
+                value = value[1:-1].lower()  # turn "(string)" into "string", "(int)" into "int", etc.
             elif kind == "IDENTIFIER":
                 if value == "true":
                     kind = "BOOLEAN"
@@ -67,6 +83,6 @@ class Lexer:
                     kind = "BOOLEAN"
                     value = "false"
 
-            self.tokens.append(Token(kind, value))
+            self.tokens.append(Token(kind, value, line_num, column))
 
         return self.tokens

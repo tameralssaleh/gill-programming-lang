@@ -1,9 +1,9 @@
 from nodes import *
+from environment import Env
 
 class Interpreter:
-    def __init__(self):
-        self.variables = {}  # symbol table | DONT USE THIS
-
+    def __init__(self, global_env: Env):
+        self.global_env: Env = global_env
 
     def visit(self, node):
         """Dispatch method based on node type"""
@@ -15,40 +15,101 @@ class Interpreter:
             return node.value
         elif isinstance(node, BooleanNode):
             return self.eval_boolean(node.value)
+        elif isinstance(node, CastNode):
+            target_type = node.target_type.lower()
+            
+            if node.expression in self.global_env.variables: # Check if the expression is an identifier/variable
+                value = self.global_env.variables[node.expression]
+            else:
+                value = self.visit(node.expression)
+
+            if target_type == "int":
+                return int(value)
+            elif target_type == "float":
+                return float(value)
+            elif target_type == "string":
+                return str(value)
+            elif target_type == "char":
+                return str(value)[0]  # take first character
+            elif target_type == "bool":
+                return bool(value)
+            elif target_type == "void":
+                return None
+            else:
+                raise ValueError(f"Unknown cast type: {target_type}")
+            
         elif isinstance(node, IdentifierNode):
-            if node.name in self.variables:
-                return self.variables[node.name]
+            if node.name in self.global_env.variables:
+                return self.global_env.variables[node.name]
             else:
                 raise NameError(f"Undefined variable '{node.name}'")
         # elif isinstance(node, NullableIdentifierNode):
-        #     if node.name in self.variables:
-        #         return self.variables[node.name]
+        #     if node.name in self.global_env.variables:
+        #         return self.global_env.variables[node.name]
         #     else:
         #         return None
         elif isinstance(node, BinOpNode):
             left = self.visit(node.left)
             right = self.visit(node.right)
             return self.eval_binop(left, node.op, right)
+        
         elif isinstance(node, UnaryOpNode):
             value = self.visit(node.operand)
             if node.op == "NOT":
                 return not value
             else:
-                raise ValueError(f"Unknown unary operator {node.op}")
+                raise ValueError(f"Unknown unary operator {node.op}") 
+            
+        elif isinstance(node, IncNode):
+            if node.identifier in self.global_env.variables:
+                self.global_env.variables[node.identifier] += 1
+                return self.global_env.variables[node.identifier]
+            else:
+                raise NameError(f"Undefined variable '{node.identifier}'")
+
+        elif isinstance(node, DecNode):
+            if node.identifier in self.global_env.variables:
+                self.global_env.variables[node.identifier] -= 1
+                return self.global_env.variables[node.identifier]
+            else:
+                raise NameError(f"Undefined variable '{node.identifier}'")
+
+        elif isinstance(node, IfBlockNode):
+            condition = self.visit(node.condition)
+            if condition:
+                return self.visit(node.true_block)
+            elif node.false_block:
+                return self.visit(node.false_block)
+            return None
+
+        elif isinstance(node, WhileBlockNode):
+            while self.visit(node.condition):
+                self.visit(node.body)  # just execute the body, ignore the return
+            
+        elif isinstance(node, OutputNode):
+            value = self.visit(node.expression)
+            print(value)
+            return value  # or None
+
 
         elif isinstance(node, DefineNode):
             value = self.visit(node.value)
-            self.variables[node.name] = value
+            self.global_env.variables[node.name] = value
             return value
         elif isinstance(node, AssignNode):
             value = self.visit(node.value)
-            if node.name in self.variables:
-                self.variables[node.name] = value
+            if node.name in self.global_env.variables:
+                self.global_env.variables[node.name] = value
                 return value
             else:
                 raise NameError(f"Undefined variable '{node.name}' must be defined before assignment.")
-        else:
-            raise TypeError(f"Unknown node type: {type(node)}")
+
+        elif isinstance(node, BlockNode):
+            last_result = None
+            for stmt in node.statements:
+                last_result = self.visit(stmt)  # OutputNode prints internally
+            return last_result
+
 
     def eval_binop(self, left, op, right):
         if op == "ADD":

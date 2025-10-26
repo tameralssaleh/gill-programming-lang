@@ -1,6 +1,14 @@
 class ASTNode:
     pass
 
+class CastNode(ASTNode):
+    def __init__(self, target_type: str, expression):
+        self.target_type = target_type
+        self.expression = expression
+
+    def __repr__(self):
+        return f"CastNode(to={self.target_type}, expr={self.expression})"
+
 class NumberNode(ASTNode):
     def __init__(self, value):
         self.value = value
@@ -67,7 +75,44 @@ class BinOpNode(ASTNode):
     def __repr__(self):
         return f"BinOpNode({self.left}, {self.op}, {self.right})"
     
-class UnaryOpNode:
+class IncNode(ASTNode):
+    def __init__(self, identifier):
+        self.identifier = identifier
+
+    def __repr__(self):
+        return f"IncNode({self.identifier})"
+
+class DecNode(ASTNode):
+    def __init__(self, identifier):
+        self.identifier = identifier
+
+    def __repr__(self):
+        return f"DecNode({self.identifier})"
+    
+class UnaryOpNode(ASTNode):
     def __init__(self, op, operand):
         self.op = op
         self.operand = operand
+
+# Blocks for control flow, logic and loops, functions and classes, etc...
+
+class BlockNode(ASTNode):
+    def __init__(self, statements):
+        self.statements = statements
+
+class IfBlockNode(ASTNode):
+    def __init__(self, condition, true_block, false_block=None):
+        self.condition = condition
+        self.true_block = true_block
+        self.false_block = false_block # Also considered an "else" block
+
+class WhileBlockNode(ASTNode):
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+# Keywords for output and input...
+
+class OutputNode(ASTNode):
+    def __init__(self, expression):
+        self.expression = expression
