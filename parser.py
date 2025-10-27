@@ -106,9 +106,19 @@ class Parser:
         
         elif token.kind == "LPAREN":
             self.eat("LPAREN")
-            node = self.parse_boolean()
-            self.eat("RPAREN")
-            return node
+
+            # Check if this is a cast: (type)expr
+            if self.current_token and self.current_token.kind == "CAST":
+                cast_token = self.eat("CAST").value
+                self.expect("RPAREN")  # must close the cast parentheses
+                expr_node = self.parse_factor()  # parse the expression being cast
+                return CastNode(cast_token, expr_node)
+            else:
+                # normal parenthesized expression
+                node = self.parse_boolean()
+                self.expect("RPAREN")
+                return node
+
         
         elif token.kind == "BOOLEAN":
             self.eat("BOOLEAN")
@@ -127,6 +137,9 @@ class Parser:
             return self.parse_casting()
 
         else:
+            for token in self.tokens:
+                print(token)
+
             raise SyntaxError(f"Unexpected token {token}")
         
     def parse_output_expr(self):

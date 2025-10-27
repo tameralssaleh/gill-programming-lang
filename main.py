@@ -29,8 +29,9 @@ with open("example.xs", "r") as file:
 try:
     tokens = lexer.tokenize(code)
     parser = Parser(tokens)
-    ast = parser.parse()          # parse the entire program
+    ast = parser.parse() # parse the entire program
     result = format_value(interpreter.visit(ast))
-    
+    for token in tokens:
+        print(token)
 except Exception as e:
     print(f"Error: {e}")

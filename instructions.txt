@@ -54,3 +54,18 @@ define y int 3
 y--
 y--
 out y ; should display '1'
+
+========= 4 ===========
+
+define pi float 3.14159265 ; pi
+define r float pi/2 ; pi/2 radians
+define d int (int)(r*(180/pi)) ; convert radians to degrees
+
+out (string)r + " radians = " + (string)d + " degrees."
+
+========= 5 ===========
+
+define age int = 20
+define name string "John"
+
+out "Hello, World! My name is " + name + " and I am " + (string)age + " years old."

@@ -1,8 +1,6 @@
-define x int 9
-x++
-out x ; should display '10'
+define age int = 20
+define name string "John"
 
-define y int 3
-y--
-y--
-out y ; should display '1'
+(string)age
+
+;out "Hello, World! My name is " + name + " and I am " + (string)age + " years old."
