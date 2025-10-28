@@ -110,8 +110,8 @@ class Parser:
             # Check if this is a cast: (type)expr
             if self.current_token and self.current_token.kind == "CAST":
                 cast_token = self.eat("CAST").value
-                self.expect("RPAREN")  # must close the cast parentheses
-                expr_node = self.parse_factor()  # parse the expression being cast
+                expr_node = self.parse_factor()  # parse the value to cast
+                self.expect("RPAREN")  # close the entire (type expr)
                 return CastNode(cast_token, expr_node)
             else:
                 # normal parenthesized expression
@@ -119,7 +119,6 @@ class Parser:
                 self.expect("RPAREN")
                 return node
 
-        
         elif token.kind == "BOOLEAN":
             self.eat("BOOLEAN")
             return BooleanNode(token.value)

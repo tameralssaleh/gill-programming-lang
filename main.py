@@ -23,7 +23,7 @@ def format_value(value):
 #         result = f"Error: {e}"
 #         print(result)
 
-with open("example.xs", "r") as file:
+with open("example.hll", "r") as file:
     code = file.read()  # read the whole file as one string
 
 try:
@@ -31,7 +31,5 @@ try:
     parser = Parser(tokens)
     ast = parser.parse() # parse the entire program
     result = format_value(interpreter.visit(ast))
-    for token in tokens:
-        print(token)
 except Exception as e:
     print(f"Error: {e}")

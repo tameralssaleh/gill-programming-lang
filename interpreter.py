@@ -113,6 +113,8 @@ class Interpreter:
 
     def eval_binop(self, left, op, right):
         if op == "ADD":
+            if isinstance(left, str) or isinstance(right, str):
+                return str(left) + str(right)
             return left + right
         elif op == "SUB":
             return left - right
