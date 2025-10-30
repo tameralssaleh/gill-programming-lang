@@ -187,7 +187,9 @@ class Parser:
     def parse_statement(self):
         tok = self.current_token
 
-        if tok.kind == "DEFINE":
+        if tok.kind == "NUMBER":
+            return self.parse_expr()
+        elif tok.kind == "DEFINE":
             return self.parse_define()
         elif tok.kind == "IDENTIFIER":
             next_tok = self.peek()
@@ -201,14 +203,20 @@ class Parser:
                 self.eat("IDENTIFIER")
                 self.eat("DEC")
                 return DecNode(var_name)
-            else:
+            elif next_tok and next_tok.kind == "ASSIGN":
                 return self.parse_assign()
+            elif next_tok and next_tok.kind in ("ADD", "SUB", "MUL", "DIV", "FDIV", "EQ", "NEQ", "LT", "LTE", "GT", "GTE", "AND", "OR"):
+                return self.parse_boolean()
             
         elif tok.kind == "LCBRACE":
             return self.parse_block()
         elif tok.kind == "OUTPUT":
             self.eat("OUTPUT")
             return self.parse_output_expr()
+        elif tok.kind == "IF":
+            return self.parse_if()
+        elif tok.kind == "WHILE":
+            return self.parse_while()
         else:
             raise SyntaxError(f"Unexpected token {tok}")
 

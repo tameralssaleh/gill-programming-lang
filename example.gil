@@ -1,0 +1,5 @@
+define pi float 3.14159265 ; pi
+define r float pi/2 ; pi/2 radians
+define d int (int)(r*(180/pi)) ; convert radians to degrees
+
+out (string)r + " radians = " + (string)d + " degrees."

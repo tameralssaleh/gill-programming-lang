@@ -12,18 +12,7 @@ def format_value(value):
         return "true" if value else "false"
     return str(value)
 
-# for ex in example_code:
-#     try:
-#         tokens = lexer.tokenize(ex)
-#         parser = Parser(tokens)
-#         ast = parser.parse()
-#         result = interpreter.visit(ast)
-#         print(format_value(result))
-#     except Exception as e:
-#         result = f"Error: {e}"
-#         print(result)
-
-with open("example.hll", "r") as file:
+with open("example.gil", "r") as file:
     code = file.read()  # read the whole file as one string
 
 try:
