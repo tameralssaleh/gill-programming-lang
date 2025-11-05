@@ -2,4 +2,4 @@ function int add_numbers(int x default 0, int y default 0) {
     return x + y
 }
 
-exec add_numbers(3, 4)
+out exec add_numbers(3, 4)

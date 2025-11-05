@@ -107,7 +107,35 @@ class Interpreter:
                     else:
                         function_env.variables[param.name] = None  # Initialize parameters to None
             return None
+        elif isinstance(node, FunctionCallNode):
+            if node.name not in self.global_env.functions:
+                raise NameError(f"Undefined function '{node.name}'")
+            
+            func_def: FunctionDefinitionNode = self.global_env.functions[node.name]
 
+            # Create a new environment for the call
+            call_env = Env(parent=func_def.local_environment)
+
+            # Evaluate and bind arguments
+            for i, arg_node in enumerate(node.arguments):
+                arg_value = self.visit(arg_node)
+                param_name = func_def.parameters[i].name
+                call_env.variables[param_name] = arg_value
+
+            prev_env = self.global_env
+            self.global_env = call_env
+            try:
+                result = None
+                for stmt in func_def.body.statements:
+                    result = self.visit(stmt)
+                return result
+            finally:
+                self.global_env = prev_env
+
+        elif isinstance(node, ReturnNode):
+            return self.visit(node.expression)
+
+    
     def eval_binop(self, left, op, right):
         if op == "ADD":
             if isinstance(left, str) or isinstance(right, str):
