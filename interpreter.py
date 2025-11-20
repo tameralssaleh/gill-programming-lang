@@ -84,9 +84,19 @@ class Interpreter:
                 return self.visit(node.false_block)
             return None
         
-        elif isinstance(node, WhileBlockNode):
+        elif isinstance(node, WhileLoopNode):
             while self.visit(node.condition):
                 self.visit(node.body)  # just execute the body, ignore the return
+
+        elif isinstance(node, ForLoopNode):
+            while self.visit(node.condition):
+                self.visit(node.body)  # just execute the body, ignore the return
+
+        elif isinstance(node, ForEachLoopNode):
+            iterable = self.visit(node.iterable)
+            for item in iterable:
+                self.global_env.variables[node.iterator]["value"] = item
+                self.visit(node.body)
 
         elif isinstance(node, OutputNode):
             value = self.visit(node.expression)
@@ -95,10 +105,22 @@ class Interpreter:
         
         elif isinstance(node, DefineNode):
             value = self.visit(node.value)
+
+            if isinstance(value, list):
+                declared_type = node.type_
+                for i, element in enumerate(value):
+                    if not self.check_type(element, declared_type):
+                        raise TypeError(f"Type mismatch in array at index {i}: Expected {declared_type}, got {type(element).__name__}")
+                    
+                self.global_env.variables[node.name] = {"type": f"{declared_type}[]", "value": value}
+
+                return value
+
             if self.check_type(value, node.type_):
                 self.global_env.variables[node.name] = {"type": node.type_, "value": value}
             else:
                 raise TypeError(f"Type mismatch: Expected {node.type_}, got {type(value).__name__}")
+            
             return value
         
         elif isinstance(node, AssignNode):
@@ -151,6 +173,12 @@ class Interpreter:
         elif isinstance(node, ReturnNode):
             value = self.visit(node.expression)
             raise ReturnException(value)
+        
+        elif isinstance(node, ArrayNode):
+            elements = [self.visit(elem) for elem in node.elements]
+            if len(elements) != node.size: # This shouldnt happen... as this error is caught during parsing.
+                raise ValueError(f"Array size mismatch: expected {node.size}, got {len(elements)}")
+            return elements
 
     
     def eval_binop(self, left, op, right):

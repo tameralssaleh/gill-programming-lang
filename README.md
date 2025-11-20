@@ -135,3 +135,10 @@ function int add_numbers(int x default 0, int y default 0) {
 ```GIL
 exec add_numbers(3, 4)
 ```
+
+10) The following GIL code creates a new array with type enforcement. An array of 3 integer elements is created by defining `x[3]` meaning integer array of 3. Note that size does not have to be specified and can be determined before runtime. However, size cannot be changed after it is declared and elements are populated into it. If you need to use a collection with a dynamic size, consider using a `List<T>`.
+
+```GIL
+define x[3] int [1, 2, 3]
+define y[] int [4, 5, 6, 7, 8, 9]
+```

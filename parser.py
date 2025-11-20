@@ -30,6 +30,22 @@ class Parser:
     def parse_define(self):
         self.eat("DEFINE")
         name = self.eat("IDENTIFIER").value
+
+        declared_size: int | None = None
+        value_node = None
+
+        if self.check("LBRACKET"):
+            # Array definition
+            self.eat("LBRACKET")
+            size_token: Token = None
+            if self.check("NUMBER"):
+                size_token = self.eat("NUMBER")
+            declared_size = size_token.value if size_token else None
+            self.eat("RBRACKET")
+            type_token = self.eat("TYPE").value
+            value_node = self.parse_array(declared_size)
+            return DefineNode(name, type_token, value_node)
+
         type_token = self.eat("TYPE").value
         value_node = self.parse_expr()
         return DefineNode(name, type_token, value_node)
@@ -134,6 +150,9 @@ class Parser:
         
         elif token.kind == "CAST":
             return self.parse_casting()
+        
+        elif token.kind == "EXECUTE":
+            return self.parse_function_call()
 
         else:
             for token in self.tokens:
@@ -238,7 +257,50 @@ class Parser:
         self.eat("WHILE")
         condition = self.parse_boolean()
         body = self.parse_block()
-        return WhileBlockNode(condition, body)
+        return WhileLoopNode(condition, body)
+    
+    def parse_for(self):
+        self.eat("FOR")
+        self.eat("LPAREN")
+        self.eat("DEFINE")
+        initializer = self.parse_statement()
+        self.eat("TYPE")
+        self.eat("COMMA")
+        condition = self.parse_boolean()
+        self.eat("COMMA")
+        increment = self.parse_statement()
+        self.eat("RPAREN")
+        body = self.parse_block()
+        return ForLoopNode(initializer, condition, increment, body)
+
+    def parse_foreach(self):
+        self.eat("FOREACH")
+        self.eat("LPAREN")
+        self.eat("DEFINE")
+        iterator = self.eat("IDENTIFIER").value
+        self.eat("TYPE")
+        self.eat("COLON")
+        iterable = self.parse_expr()
+        self.eat("RPAREN")
+        body = self.parse_block()
+        return ForEachLoopNode(iterator, iterable, body)
+    
+    def parse_array(self, declared_size=None):
+        self.eat("LBRACKET")
+        elements = []
+        if not self.check("RBRACKET"):
+            while True:
+                element_node = self.parse_expr()
+                elements.append(element_node)
+                if self.check("COMMA"):
+                    self.eat("COMMA")
+                else:
+                    break
+        arr_size = len(elements) if declared_size is None else declared_size
+        if declared_size is not None and declared_size < arr_size:
+            raise SyntaxError(f"Array size mismatch: declared size {declared_size}, but got {arr_size} elements.")
+        self.eat("RBRACKET")
+        return ArrayNode(elements, arr_size)
     
     def parse_statement(self):
         tok = self.current_token
@@ -250,7 +312,7 @@ class Parser:
         elif tok.kind == "ASSIGN":
             return self.parse_assign()
         elif tok.kind == "IDENTIFIER":
-            next_tok = self.peek()
+            next_tok: Token = self.peek()
             if next_tok and next_tok.kind == "INC":
                 var_name = tok.value
                 self.eat("IDENTIFIER")

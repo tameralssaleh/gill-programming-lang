@@ -109,9 +109,22 @@ class IfBlockNode(ASTNode):
         self.true_block = true_block
         self.false_block = false_block # Also considered an "else" block.
 
-class WhileBlockNode(ASTNode):
+class WhileLoopNode(ASTNode):
     def __init__(self, condition, body):
         self.condition = condition
+        self.body = body
+
+class ForLoopNode(ASTNode):
+    def __init__(self, initializer, condition, increment, body):
+        self.initializer = initializer
+        self.condition = condition
+        self.increment = increment
+        self.body = body
+
+class ForEachLoopNode(ASTNode):
+    def __init__(self, iterator, iterable, body):
+        self.iterator = iterator
+        self.iterable = iterable
         self.body = body
 
 # Blocks for functions...
@@ -147,3 +160,13 @@ class ReturnNode(ASTNode):
 class OutputNode(ASTNode):
     def __init__(self, expression):
         self.expression = expression
+
+# Nodes for arrays & other data structures...
+
+class ArrayNode(ASTNode):
+    def __init__(self, elements, size):
+        self.elements = elements
+        self.size = size
+
+    def __repr__(self):
+        return f"ArrayNode(size={self.size})"
