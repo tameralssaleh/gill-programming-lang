@@ -45,10 +45,7 @@ class Interpreter:
                 raise ValueError(f"Unknown cast type: {target_type}")    
                 
         elif isinstance(node, IdentifierNode):
-            if node.name in self.global_env.variables:
-                return self.global_env.variables[node.name]["value"]
-            else:
-                raise NameError(f"Undefined variable '{node.name}\nDict{self.global_env.variables}'")
+            return self.global_env.get(node.name)["value"]
             
         elif isinstance(node, BinOpNode):
             left = self.visit(node.left)
@@ -63,18 +60,16 @@ class Interpreter:
                 raise ValueError(f"Unknown unary operator {node.op}") 
             
         elif isinstance(node, IncNode):
-            if node.identifier in self.global_env.variables:
-                self.global_env.variables[node.identifier]["value"] += 1
-                return self.global_env.variables[node.identifier]["value"]
-            else:
-                raise NameError(f"Undefined variable '{node.identifier}'")
+            current = self.global_env.get(node.identifier)
+            current["value"] += 1
+            self.global_env.set(node.identifier, current)
+            return current["value"]
             
         elif isinstance(node, DecNode):
-            if node.identifier in self.global_env.variables:
-                self.global_env.variables[node.identifier]["value"] -= 1
-                return self.global_env.variables[node.identifier]["value"]
-            else:
-                raise NameError(f"Undefined variable '{node.identifier}'")
+            current = self.global_env.get(node.identifier)
+            current["value"] -= 1
+            self.global_env.set(node.identifier, current)
+            return current["value"]
             
         elif isinstance(node, IfBlockNode):
             condition = self.visit(node.condition)
@@ -89,22 +84,38 @@ class Interpreter:
                 self.visit(node.body)  # just execute the body, ignore the return
 
         elif isinstance(node, ForLoopNode):
-            while self.visit(node.condition):
-                self.visit(node.body)  # just execute the body, ignore the return
-
-        elif isinstance(node, ForEachLoopNode):
+            loop_env = Env(parent=self.global_env)
+            loop_env.variables[node.initializer] = {
+                "type": type(node.initializer_value).__name__,
+                "value": node.initializer_value
+            }
+            prev_env = self.global_env
+            self.global_env = loop_env
             try:
-                loop_env = Env(parent=self.global_env)
-                prev_env = self.global_env
-                self.global_env = loop_env
-                iterable = self.visit(node.iterable)
-                for item in iterable:
-                    self.global_env.variables[node.iterator]["value"] = item
+                while self.visit(node.condition):
                     self.visit(node.body)
-            except Exception as e:
-                raise RuntimeError(f"Error during foreach loop: {e}")
+                    self.visit(node.increment)
             finally:
                 self.global_env = prev_env
+
+        elif isinstance(node, ForEachLoopNode):
+            loop_env = Env(parent=self.global_env)
+            loop_env.variables[node.iterator] = {
+                "type": type(node.iterator).__name__,
+                "value": None
+            }
+            prev_env = self.global_env
+            self.global_env = loop_env
+            try:
+                iterable = self.visit(node.iterable)
+                for item in iterable:
+                    loop_env.variables[node.iterator]["value"] = item
+                    self.visit(node.body)
+            except Exception as e:
+                raise RuntimeError(f"Error during foreach loop: {e}\n{node.iterable}")
+            finally:
+                self.global_env = prev_env
+
 
         elif isinstance(node, OutputNode):
             value = self.visit(node.expression)
@@ -133,17 +144,16 @@ class Interpreter:
         
         elif isinstance(node, AssignNode):
             value = self.visit(node.value)
-            if node.name in self.global_env.variables:
-                self.global_env.variables[node.name]["value"] = value
-                return value
-            else:
-                raise NameError(f"Undefined variable '{node.name}' must be defined before assignment.")
-            
+            current = self.global_env.get(node.name)
+            current["value"] = value
+            self.global_env.set(node.name, current)
+            return value
+                        
         elif isinstance(node, BlockNode):
             last_result = None
             for stmt in node.statements:
                 last_result = self.visit(stmt)  # OutputNode prints internally
-            return last_result
+            return last_result 
         
         elif isinstance(node, FunctionDefinitionNode):
             # Store the function definition in the global environment
@@ -184,9 +194,20 @@ class Interpreter:
         
         elif isinstance(node, ArrayNode):
             elements = [self.visit(elem) for elem in node.elements]
-            if len(elements) != node.size: # This shouldnt happen... as this error is caught during parsing.
+            if len(elements) != node.size: # This should not execute... as this error is caught during parsing.
                 raise ValueError(f"Array size mismatch: expected {node.size}, got {len(elements)}")
             return elements
+        
+        elif isinstance(node, ArrayAccessNode):
+            array_name = self.global_env.get(node.array_name)
+            index = self.visit(node.index)
+            if not isinstance(array_name["value"], list):
+                raise TypeError(f"Variable '{node.array_name}' is not an array.")
+            elif not isinstance(index, int):
+                raise TypeError(f"Array index must be an integer, got {type(index).__name__}.")
+            elif index < 0 or index >= len(array_name["value"]):
+                raise IndexError(f"Array index {index} out of bounds for array '{node.array_name}' of size {len(array_name['value'])}.")
+            return array_name["value"][index]
 
     
     def eval_binop(self, left, op, right):
@@ -224,7 +245,7 @@ class Interpreter:
             return not left
         else:
             raise ValueError(f"Unknown operator {op}")
-        
+       
     def eval_boolean(self, value):
         if value == "true":
             return True

@@ -100,6 +100,9 @@ class Parser:
         
         elif token.kind == "IDENTIFIER":
             self.eat("IDENTIFIER")
+            # if self.peek() and self.peek().kind == "LBRACKET":
+            #     self.eat("LBRACKET")
+            #     return self.parse_array_access(name)
             variable_name = token.value
 
             if self.check("INC"):
@@ -158,7 +161,7 @@ class Parser:
             for token in self.tokens:
                 print(token)
 
-            raise SyntaxError(f"Unexpected token {token}")
+            raise SyntaxError(f"Unexpected token {token} (method:parse_factor)")
         
     def parse_output_expr(self):
         if self.check("EXECUTE"):
@@ -263,15 +266,16 @@ class Parser:
         self.eat("FOR")
         self.eat("LPAREN")
         self.eat("DEFINE")
-        initializer = self.parse_statement()
+        initializer = self.eat("IDENTIFIER").value
         self.eat("TYPE")
+        initializer_value = self.eat("NUMBER").value
         self.eat("COMMA")
         condition = self.parse_boolean()
         self.eat("COMMA")
         increment = self.parse_statement()
         self.eat("RPAREN")
         body = self.parse_block()
-        return ForLoopNode(initializer, condition, increment, body)
+        return ForLoopNode(initializer, initializer_value, condition, increment, body)
 
     def parse_foreach(self):
         self.eat("FOREACH")
@@ -302,6 +306,12 @@ class Parser:
         self.eat("RBRACKET")
         return ArrayNode(elements, arr_size)
     
+    def parse_array_access(self, array_name):
+        self.eat("LBRACKET")
+        index_node = self.parse_expr()
+        self.eat("RBRACKET")
+        return ArrayAccessNode(array_name, index_node)
+    
     def parse_statement(self):
         tok = self.current_token
 
@@ -313,6 +323,7 @@ class Parser:
             return self.parse_assign()
         elif tok.kind == "IDENTIFIER":
             next_tok: Token = self.peek()
+            print(f"Next token after IDENTIFIER: {next_tok}")
             if next_tok and next_tok.kind == "INC":
                 var_name = tok.value
                 self.eat("IDENTIFIER")
@@ -325,6 +336,9 @@ class Parser:
                 return DecNode(var_name)
             elif next_tok and next_tok.kind in ("ADD", "SUB", "MUL", "DIV", "FDIV", "EQ", "NEQ", "LT", "LTE", "GT", "GTE", "AND", "OR"):
                 return self.parse_boolean()
+            # elif next_tok and next_tok.kind == "LBRACKET":
+            #     arr_name = self.eat("IDENTIFIER").value
+            #     return self.parse_array_access(arr_name)
         elif tok.kind == "FUNCTION":
             return self.parse_function_definition()
         elif tok.kind == "RETURN":
@@ -345,14 +359,14 @@ class Parser:
         elif tok.kind == "FOREACH":
             return self.parse_foreach()
         else:
-            raise SyntaxError(f"Unexpected token {tok}")
+            raise SyntaxError(f"Unexpected token {tok} in statement parsing.\n{self.tokens}")
 
     def parse_block(self):
         self.expect("LCBRACE")
         statements = []
 
         while not self.check("RCBRACE"):
-            stmt = self.parse_statement()  # <--- uses the new LCBBRACE case
+            stmt = self.parse_statement()  
             if stmt:
                 statements.append(stmt)
 

@@ -142,3 +142,30 @@ exec add_numbers(3, 4)
 define x[3] int [1, 2, 3]
 define y[] int [4, 5, 6, 7, 8, 9]
 ```
+
+11) The following GIL code creates a new array with type enforcement of 3 integers, and then loops through the array with a `foreach` loop to display each element of `x`.
+```GIL
+define x[3] int [1, 2, 3]
+foreach (define num int : x) {
+    out x
+}
+```
+
+12) The following GIL code does the same thing as #11, however this time we are working with nested loops, meaning that we can see some pretty cool mathematical results when adding two elements from two different lists during iteration.
+```GIL
+define x[5] int [1, 2, 3, 4, 5]
+define y[5] int [5, 4, 3, 2, 1]
+
+foreach (define num1 int : x) {
+    foreach (define num2 int : y) {
+        out num1 + num2
+    }
+}
+```
+
+13) The following GIL code creates a simple for loop, not bound to an array or any other collection. This basically works the same way as a traditional while loop.
+```GIL
+for (define i int 0, i < 10, i++) {
+    out i
+}
+```

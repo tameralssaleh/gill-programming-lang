@@ -115,8 +115,9 @@ class WhileLoopNode(ASTNode):
         self.body = body
 
 class ForLoopNode(ASTNode):
-    def __init__(self, initializer, condition, increment, body):
+    def __init__(self, initializer, initializer_value, condition, increment, body):
         self.initializer = initializer
+        self.initializer_value = initializer_value
         self.condition = condition
         self.increment = increment
         self.body = body
@@ -172,3 +173,11 @@ class ArrayNode(ASTNode):
 
     def __repr__(self):
         return f"ArrayNode(size={self.size})"
+    
+class ArrayAccessNode(ASTNode):
+    def __init__(self, array_name, index):
+        self.array_name = array_name
+        self.index = index
+
+    def __repr__(self):
+        return f"ArrayAccessNode(array={self.array_name}, index={self.index})"

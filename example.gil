@@ -1,7 +1,12 @@
+define x int 0
 
-define y[] int [4, 5, 6, 7, 8, 9]
+while (x!=69)
+{ out x
+ assign x x + 1 }
+if (x==69){
+    out "oogabooga"
+} else {
 
-foreach (define x int : y) {
-    out x
-}
+ out "errorrr"}
+
 
