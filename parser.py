@@ -2,9 +2,10 @@ from nodes import *
 from tokenclass import Token
 
 class Parser:
-    def __init__(self, tokens):
+    def __init__(self, tokens, debug=False):
         self.tokens = tokens
         self.position = 0
+        self.debug = debug
 
     @property
     def current_token(self) -> Token:
@@ -93,16 +94,17 @@ class Parser:
 
     def parse_factor(self):
         token = self.current_token
-
+        print(f"Parsing factor with token: {token}") if self.debug else None
         if token.kind == "NUMBER":
             self.eat("NUMBER")
             return NumberNode(token.value)
         
         elif token.kind == "IDENTIFIER":
+            print(f"Parsing IDENTIFIER: {token}") if self.debug else None
             self.eat("IDENTIFIER")
-            # if self.peek() and self.peek().kind == "LBRACKET":
-            #     self.eat("LBRACKET")
-            #     return self.parse_array_access(name)
+            print(f"Current token after eating IDENTIFIER: {self.current_token}") if self.debug else None
+            if self.check("LBRACKET"):
+                return self.parse_array_access(token.value)
             variable_name = token.value
 
             if self.check("INC"):
@@ -164,6 +166,7 @@ class Parser:
             raise SyntaxError(f"Unexpected token {token} (method:parse_factor)")
         
     def parse_output_expr(self):
+        print(f"Parsing output expression, current token: {self.current_token}") if self.debug else None
         if self.check("EXECUTE"):
             func_call = self.parse_function_call()
             return OutputNode(func_call)
@@ -316,20 +319,30 @@ class Parser:
         tok = self.current_token
 
         if tok.kind == "NUMBER":
+            print(f"Parsing NUMBER, current token: {self.current_token}") if self.debug else None
             return self.parse_expr()
         elif tok.kind == "DEFINE":
+            print(f"Parsing DEFINE statement, current token: {self.current_token}") if self.debug else None
             return self.parse_define()
         elif tok.kind == "ASSIGN":
+            print(f"Parsing ASSIGN statement, current token: {self.current_token}") if self.debug else None
             return self.parse_assign()
         elif tok.kind == "IDENTIFIER":
             next_tok: Token = self.peek()
-            print(f"Next token after IDENTIFIER: {next_tok}")
+            print(f"Next token after IDENTIFIER: {next_tok}") if self.debug else None
+            if next_tok and next_tok.kind == "LBRACKET":
+                print(f"Parsing ARRAY ACCESS statement, current token: {self.current_token}") if self.debug else None
+                var_name = tok.value
+                self.eat("IDENTIFIER")
+                return self.parse_array_access(var_name)
             if next_tok and next_tok.kind == "INC":
+                print(f"Parsing INC statement, current token: {self.current_token}") if self.debug else None
                 var_name = tok.value
                 self.eat("IDENTIFIER")
                 self.eat("INC")
                 return IncNode(var_name)
             elif next_tok and next_tok.kind == "DEC":
+                print(f"Parsing DEC statement, current token: {self.current_token}") if self.debug else None
                 var_name = tok.value
                 self.eat("IDENTIFIER")
                 self.eat("DEC")
@@ -340,23 +353,31 @@ class Parser:
             #     arr_name = self.eat("IDENTIFIER").value
             #     return self.parse_array_access(arr_name)
         elif tok.kind == "FUNCTION":
+            print(f"Parsing FUNCTION statement, current token: {self.current_token}") if self.debug else None
             return self.parse_function_definition()
         elif tok.kind == "RETURN":
+            print(f"Parsing RETURN statement, current token: {self.current_token}") if self.debug else None
             self.eat("RETURN")
             expr_node = self.parse_expr()
             return ReturnNode(expr_node)
         elif tok.kind == "LCBRACE":
+            print(f"Parsing block, current token: {self.current_token}") if self.debug else None
             return self.parse_block()
         elif tok.kind == "IF":
+            print(f"Parsing IF statement, current token: {self.current_token}") if self.debug else None
             return self.parse_if()
         elif tok.kind == "WHILE":
+            print(f"Parsing WHILE loop, current token: {self.current_token}") if self.debug else None
             return self.parse_while()
         elif tok.kind == "OUTPUT":
+            print(f"Parsing OUTPUT statement, current token: {self.current_token}") if self.debug else None
             self.eat("OUTPUT")
             return self.parse_output_expr()
         elif tok.kind == "FOR":
+            print(f"Parsing FOR loop, current token: {self.current_token}") if self.debug else None
             return self.parse_for()
         elif tok.kind == "FOREACH":
+            print(f"Parsing FOREACH loop, current token: {self.current_token}") if self.debug else None
             return self.parse_foreach()
         else:
             raise SyntaxError(f"Unexpected token {tok} in statement parsing.\n{self.tokens}")

@@ -169,3 +169,9 @@ for (define i int 0, i < 10, i++) {
     out i
 }
 ```
+
+14) The following GIL code creates a simple array and outputs an element from the array by index addressing.
+```GIL
+define x[] int [1, 2, 3]
+out x[2] ; Displays 3 in output
+```

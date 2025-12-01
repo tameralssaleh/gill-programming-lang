@@ -1,12 +1,2 @@
-define x int 0
-
-while (x!=69)
-{ out x
- assign x x + 1 }
-if (x==69){
-    out "oogabooga"
-} else {
-
- out "errorrr"}
-
-
+define x[3] int [1, 2, 3]
+out x[2] ; Displays 3 in output
