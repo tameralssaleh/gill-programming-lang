@@ -79,6 +79,15 @@ class Interpreter:
                 return self.visit(node.false_block)
             return None
         
+        elif isinstance(node, TryCatchNode):
+            try:
+                return self.visit(node.try_block)
+            except node.catch_exception as e:
+                return self.visit(node.catch_block)
+            finally:
+                if node.finally_block:
+                    self.visit(node.finally_block)
+        
         elif isinstance(node, WhileLoopNode):
             while self.visit(node.condition):
                 self.visit(node.body)  # just execute the body, ignore the return
@@ -115,7 +124,6 @@ class Interpreter:
                 raise RuntimeError(f"Error during foreach loop: {e}\n{node.iterable}")
             finally:
                 self.global_env = prev_env
-
 
         elif isinstance(node, OutputNode):
             value = self.visit(node.expression)

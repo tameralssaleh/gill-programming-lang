@@ -1,2 +1,10 @@
 define x[3] int [1, 2, 3]
-out x[2] ; Displays 3 in output
+
+try {
+    out x[5] ; This line will not work as the index is out of range, thus will execute the catch block. 
+} catch {
+    out "Error"
+} finally {
+    out "Code finished." ; this will execute no matter if there is an error or if the try block executed without an error.
+}
+

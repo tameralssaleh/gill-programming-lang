@@ -175,3 +175,16 @@ for (define i int 0, i < 10, i++) {
 define x[] int [1, 2, 3]
 out x[2] ; Displays 3 in output
 ```
+
+15) The following GIL code creates a simple array and then utilizes the try-catch-finally blocks to execute code based on if there were an error or not. The try block will attempt to execute the code within it, if the code executes without an error, then it will terminate and execute the finally block. If there is an error within the try block, then the catch block will execute instead, then lastly it will execute the finally block. The finally block is completely optional, and is there if you want to execute code no matter if an error occurred within the try block.
+```GIL
+define x[3] int [1, 2, 3]
+
+try {
+    out x[5] ; This line will not work as the index is out of range, thus will execute the catch block. 
+} catch {
+    out "Error"
+} finally {
+    out "Code finished." ; this will execute no matter if there is an error or if the try block executed without an error.
+}
+```

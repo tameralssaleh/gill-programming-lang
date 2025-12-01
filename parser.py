@@ -242,6 +242,22 @@ class Parser:
             
         self.eat("RPAREN")
         return FunctionCallNode(function_name, args)
+    
+    def parse_try_catch(self):
+        self.eat("TRY")
+        try_block = self.parse_block()
+        catch_block = None
+        finally_block = None
+        if not self.check("CATCH"):
+            raise SyntaxError("Try block must be followed by a catch block.")
+        self.eat("CATCH")
+        catch_block = self.parse_block()
+        if self.check("FINALLY"):
+            self.eat("FINALLY")
+            finally_block = self.parse_block()
+        
+        # Later... parse Exception type to catch.
+        return TryCatchNode(try_block, catch_block, Exception, finally_block)
 
     def parse_if(self):
         self.eat("IF")
@@ -349,9 +365,6 @@ class Parser:
                 return DecNode(var_name)
             elif next_tok and next_tok.kind in ("ADD", "SUB", "MUL", "DIV", "FDIV", "EQ", "NEQ", "LT", "LTE", "GT", "GTE", "AND", "OR"):
                 return self.parse_boolean()
-            # elif next_tok and next_tok.kind == "LBRACKET":
-            #     arr_name = self.eat("IDENTIFIER").value
-            #     return self.parse_array_access(arr_name)
         elif tok.kind == "FUNCTION":
             print(f"Parsing FUNCTION statement, current token: {self.current_token}") if self.debug else None
             return self.parse_function_definition()
@@ -366,6 +379,9 @@ class Parser:
         elif tok.kind == "IF":
             print(f"Parsing IF statement, current token: {self.current_token}") if self.debug else None
             return self.parse_if()
+        elif tok.kind == "TRY":
+            print(f"Parsing TRY-CATCH statement, current token: {self.current_token}") if self.debug else None
+            return self.parse_try_catch()
         elif tok.kind == "WHILE":
             print(f"Parsing WHILE loop, current token: {self.current_token}") if self.debug else None
             return self.parse_while()

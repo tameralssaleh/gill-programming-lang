@@ -97,7 +97,7 @@ class UnaryOpNode(ASTNode):
         self.op = op
         self.operand = operand
 
-# Blocks for control flow, logic and loops, functions and classes, etc...
+# Nodes for control flow, blocks, logic and loops, functions and classes, etc...
 
 class BlockNode(ASTNode):
     def __init__(self, statements):
@@ -108,6 +108,13 @@ class IfBlockNode(ASTNode):
         self.condition = condition
         self.true_block = true_block
         self.false_block = false_block # Also considered an "else" block.
+
+class TryCatchNode(ASTNode):
+    def __init__(self, try_block, catch_block, catch_exception=Exception, finally_block=None):
+        self.try_block = try_block
+        self.catch_block = catch_block
+        self.catch_exception = catch_exception # Exception object to catch, defaults to base Exception class.
+        self.finally_block = finally_block # Optional finally block.
 
 class WhileLoopNode(ASTNode):
     def __init__(self, condition, body):
@@ -130,7 +137,7 @@ class ForEachLoopNode(ASTNode):
         self.local_environment: Env = None # Defined later in the interpreter. Stores the loops local variables including the iterator.
         self.global_environment: Env = None # Defined later in the interpreter. Points to the global environment where the loop was defined.
 
-# Blocks for functions...
+# Nodes for functions...
 
 class ParameterNode(ASTNode):
     def __init__(self, name, type_):
