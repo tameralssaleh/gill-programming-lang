@@ -1,6 +1,6 @@
 # General Interpreted Language (GIL)
 
-**HawkScript** is a lightweight, fast, general-purpose object-oriented programming language.
+**GIL** is a lightweight, fast, general-purpose object-oriented programming language.
 
 ---
 
