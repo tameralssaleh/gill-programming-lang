@@ -1,5 +1,0 @@
-import stdlib
-
-namespace program {
-    out exec pow(2,2)
-}

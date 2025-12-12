@@ -390,6 +390,9 @@ class Parser:
             self.eat("RETURN")
             expr_node = self.parse_expr()
             return ReturnNode(expr_node)
+        elif tok.kind == "EXECUTE":
+            print(f"Parsing FUNCTION CALL statement, current token: {self.current_token}") if self.debug else None
+            return self.parse_function_call()
         elif tok.kind == "LCBRACE":
             print(f"Parsing block, current token: {self.current_token}") if self.debug else None
             return self.parse_block()
