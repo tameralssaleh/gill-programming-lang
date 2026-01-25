@@ -12,7 +12,7 @@ def format_value(value):
         return "true" if value else "false"
     return str(value)
 
-with open("example.gil", "r") as file:
+with open("example.gill", "r") as file:
     code = file.read()  # read the whole file as one string
 
 try:

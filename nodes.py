@@ -109,6 +109,21 @@ class IfBlockNode(ASTNode):
         self.true_block = true_block
         self.false_block = false_block # Also considered an "else" block.
 
+class SwitchCaseBlockNode(ASTNode): # Contains the switch statement, array of cases, and a default case if provided.
+    def __init__(self, expression: ASTNode, cases: list["CaseBlockNode"], default_block=None):
+        self.expression = expression
+        self.cases = cases
+        self.default_block = default_block
+
+class CaseBlockNode(ASTNode):
+    def __init__(self, case_value: ASTNode, body: BlockNode):
+        self.case_value = case_value
+        self.body = body
+
+class DefaultBlockNode(ASTNode): # This executes if no case matches the switch expression.
+    def __init__(self, body: BlockNode):
+        self.body = body
+
 class TryCatchNode(ASTNode):
     def __init__(self, try_block, catch_block, catch_exception=Exception, finally_block=None):
         self.try_block = try_block

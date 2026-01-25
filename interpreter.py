@@ -80,6 +80,15 @@ class Interpreter:
                 return self.visit(node.false_block)
             return None
         
+        elif isinstance(node, SwitchCaseBlockNode):
+            expression = self.visit(node.expression)
+            for case in node.cases:
+                if expression == self.visit(case.case_value):
+                    return self.visit(case.body)
+            if node.default_block:
+                # Only executes if loop terminated with no expression being equal to any case value.
+                return self.visit(node.default_block.body)
+        
         elif isinstance(node, TryCatchNode):
             try:
                 return self.visit(node.try_block)

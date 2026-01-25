@@ -281,6 +281,38 @@ class Parser:
             false_block = self.parse_else()
 
         return IfBlockNode(condition, true_block, false_block)
+    
+    def parse_switch(self):
+        self.eat("SWITCH")
+        self.eat("LPAREN")
+        expr_node: ASTNode = self.parse_expr()
+        self.eat("RPAREN")
+        self.eat("LCBRACE")
+        cases: list[CaseBlockNode] = []
+        default_case: DefaultBlockNode = None
+        while not self.check("RCBRACE"):
+            cases.append(self.parse_case())
+            if self.check("DEFAULT"):
+                self.eat("DEFAULT")
+                default_case: DefaultBlockNode = DefaultBlockNode(self.parse_block())
+                if self.check("CASE"):
+                    # Error out... Default statement should be at the end
+                    raise SyntaxError("default statements belong at the end of switch-case statements.")
+
+        self.eat("RCBRACE")
+        return SwitchCaseBlockNode(expr_node, cases, default_case)
+    
+    def parse_case(self):
+        case_value_node = None
+        case_block: BlockNode = None
+        if self.check("CASE"):
+            self.eat("CASE")
+            self.eat("LPAREN")
+            case_value_node = self.parse_expr()
+            self.eat("RPAREN")
+            case_block = self.parse_block() # This function automatically eats the LCBRACE and RCBRACE
+
+        return CaseBlockNode(case_value_node, case_block)
 
     def parse_else(self):
         self.eat("ELSE")
@@ -399,6 +431,9 @@ class Parser:
         elif tok.kind == "IF":
             print(f"Parsing IF statement, current token: {self.current_token}") if self.debug else None
             return self.parse_if()
+        elif tok.kind == "SWITCH":
+            print(f"Parsing SWITCH statement, current token: {self.current_token}") if self.debug else None
+            return self.parse_switch()
         elif tok.kind == "TRY":
             print(f"Parsing TRY-CATCH statement, current token: {self.current_token}") if self.debug else None
             return self.parse_try_catch()

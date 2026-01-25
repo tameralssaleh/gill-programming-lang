@@ -11,6 +11,8 @@ class Lexer:
             ("OUTPUT", r"out"),
             ("IF", r"if"),
             ("ELSE", r"else"),
+            ("SWITCH", r"switch"),
+            ("CASE", r"case"),
             ("TRY", r"try"),
             ("CATCH", r"catch"),
             ("FINALLY", r"finally"),
@@ -34,7 +36,9 @@ class Lexer:
             ("DEC", r"--"),  
             ("EXECUTE", r"exec"),         
             ("IDENTIFIER", r"[A-Za-z_][A-Za-z0-9_]*"),
-            ("COMMENT", r";"),
+            ("COMMENT", r"//"),
+            ("CMTBLOCKSTART", r"/\*"),
+            ("CMTBLOCKEND", r"\*/"),
             ("COMMA", r","),
             ("LPAREN", r"\("),
             ("RPAREN", r"\)"),
@@ -50,7 +54,7 @@ class Lexer:
             ("SUB", r"-"),
             ("MUL", r"\*"),
             ("DIV", r"/"),
-            ("FDIV", r"//"),
+            ("FDIV", r"\\\\"),
             ("MOD", r"%"),
             ("EQ", r"=="),
             ("NEQ", r"!="),
@@ -61,6 +65,7 @@ class Lexer:
             ("AND", r"&&"),
             ("OR", r"\|\|"),
             ("NOT", r"!"),
+            ("SEMICOLON", r";"),
             ("WHITESPACE", r"\s+"),
             ("NEWLINE", r"\n")
         ]
@@ -68,8 +73,8 @@ class Lexer:
         self.token_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in self.token_specs)
 
     def tokenize(self, text):
-        # Remove semicolon comments
-        text = re.sub(r";[^\n]*", "", text)
+        # Remove double slash comments
+        text = re.sub(r"//[^\n]*", "", text)
         self.text = text
         self.position = 0
         self.tokens = []
@@ -80,7 +85,7 @@ class Lexer:
             kind = match.lastgroup
             value = match.group()
             column = match.start() - line_start + 1
-            if kind in ("WHITESPACE", "NEWLINE"):
+            if kind in ("WHITESPACE", "NEWLINE", "SEMICOLON"): # Ignore whitespace, newlines, and semicolons (semicolons are optional in GILL)
                 line_num += 1
                 line_start = match.end()
                 continue
