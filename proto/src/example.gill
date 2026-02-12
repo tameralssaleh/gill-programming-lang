@@ -1,0 +1,3 @@
+import stdlib
+
+out exec stdlib::sizeof(4)

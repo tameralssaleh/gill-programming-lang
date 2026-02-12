@@ -1,0 +1,6 @@
+# __pycache__
+__pycache__/
+# __pycache__ in /packages
+proto/src/packages/*/__pycache__/
+# Byte-compiled files
+*.pyc

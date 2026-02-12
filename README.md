@@ -7,6 +7,7 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
+- [Contributions](/contributions.md)
 - [Getting Started](#getting-started)
 - [Other Useful Information](#other-useful-information)
 - [Syntax Examples](#syntax-examples)
@@ -23,8 +24,16 @@ General Interpreted Language (GILL) focuses on:
 ---
 
 ## Version
-- Current GILL version as of 1/24/2026: 0.0.1
+- Current GILL version as of 2/12/2026: 0.1.0
 - Node that GILL is currently using a Python based prototype interpreter, and that a newer, and much faster one will come in the future!
+
+## 2/12/2026 Version 0.1.0 Changelog:
+- Added switch-case statements.
+- Added import statements.
+- Added ability to create Python modules and import them into GILL.
+
+## Known Bugs:
+- Cannot call module functions inside another module function as an argument yet.
 
 ## Features
 - Built-in REPL
