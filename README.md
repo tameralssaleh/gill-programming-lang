@@ -236,5 +236,5 @@ import stdlib
 
 out stdlib::gill_version // Outputs the version of GILL.
 
-exec printf("Hello from the stdlib module!\n") // Calls the printf function from the stdlib module.
+exec stdlib::printf("Hello from the stdlib module!\n") // Calls the printf function from the stdlib module.
 ```
