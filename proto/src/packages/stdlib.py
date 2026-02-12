@@ -3,11 +3,11 @@ from environment import ModuleEnv
 from rts import *
 from typing import Any
 
-# STANDARD LIBRARY FOR GIL
+# STANDARD LIBRARY FOR GILL
 # This file contains built-in functions and definitions for the GIL language.
 
 ### Variables
-version = "0.0.1"  # Version of the GIL language
+gill_version = "0.1.0"  # Version of the GILL language
 
 ### Functions
 
@@ -86,5 +86,5 @@ module_env.functions = {
 # Variables to register in the stdlib module
 # Just like functions, the variable name should match the same of the variable's python implementation.
 module_env.variables = {
-    "version": NativeVariable("version", "string", version)
+    "gill_version": NativeVariable("gill_version", "string", gill_version)
 }

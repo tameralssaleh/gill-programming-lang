@@ -18,7 +18,7 @@ with open("./proto/src/example.gill", "r") as file:
 try:
     tokens = lexer.tokenize(code)
     parser = Parser(tokens)
-    parser.debug = True  # Enable debug mode
+    # parser.debug = True  # Enable debug mode
     ast = parser.parse() # parse the entire program
     result = format_value(interpreter.visit(ast))
 except Exception as e:

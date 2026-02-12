@@ -33,7 +33,9 @@ General Interpreted Language (GILL) focuses on:
 - Added ability to create Python modules and import them into GILL.
 
 ## Known Bugs:
-- Cannot call module functions inside another module function as an argument yet.
+The following bugs are known and will be fixed in future patches.
+- Cannot reference/call module functions inside another module function as an argument.
+- Cannot reference variables from imported modules using scope resolution operator.
 
 ## Features
 - Built-in REPL
@@ -224,4 +226,15 @@ switch (x) {
         out "x is neither 1 or 2, so this block is executed."
     }
 }
+```
+
+17) The following GILL code demonstrates how to import modules, libraries, and packages into your GILL program. This allows you to use prepackaged functionality that is not built into the core language. In this example, we will import a module called `math_utils` which contains various mathematical functions.
+```GILL
+import stdlib
+
+// Now you can use the functions and variables defined in the stdlib module
+
+out stdlib::gill_version // Outputs the version of GILL.
+
+exec printf("Hello from the stdlib module!\n") // Calls the printf function from the stdlib module.
 ```

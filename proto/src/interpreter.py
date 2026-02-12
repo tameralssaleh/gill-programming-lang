@@ -54,7 +54,7 @@ class Interpreter:
         elif isinstance(node, IdentifierNode):
             # Prefer variables in the current environment, then check modules for member references.
             try:
-                return self.global_env.get(node.name)["value"]
+                return self.global_env.variables[node.name]["value"]
             except NameError:
                 # If not found in current environment, check if it's referencing a module.
                 if node.name in self.global_env.modules:
@@ -74,15 +74,15 @@ class Interpreter:
                 raise ValueError(f"Unknown unary operator {node.op}") 
             
         elif isinstance(node, IncNode):
-            current = self.global_env.get(node.identifier)
+            current = self.global_env.variables[node.identifier]
             current["value"] += 1
-            self.global_env.set(node.identifier, current)
+            self.global_env.variables[node.identifier] = current
             return current["value"]
             
         elif isinstance(node, DecNode):
-            current = self.global_env.get(node.identifier)
+            current = self.global_env.variables[node.identifier]
             current["value"] -= 1
-            self.global_env.set(node.identifier, current)
+            self.global_env.variables[node.identifier] = current
             return current["value"]
             
         elif isinstance(node, IfBlockNode):

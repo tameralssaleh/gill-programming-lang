@@ -1,3 +1,5 @@
 import stdlib
 
-out exec stdlib::sizeof(4)
+exec stdlib::printf("Hello from the stdlib module!") // Calls the printf function from the stdlib module.
+define x int 5
+out x + 7
